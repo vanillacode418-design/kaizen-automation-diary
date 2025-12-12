@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kaizen Automation Roadmap — Dashboard</title>
+
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="topbar">
+      <div class="left">
+        <h1 id="app-title">Kaizen Automation Roadmap</h1>
+        <div class="meta small">Project: <input id="projectName" class="inline-input" /></div>
+      </div>
+      <div class="right">
+        <div id="progressWrap" class="progress-wrap" title="Overall progress">
+          <div id="progressPct" class="progress-pct">0%</div>
+          <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+        </div>
+        <button id="quickSaveBtn" class="btn neon">Quick Save</button>
+        <button id="exportJsonBtn" class="btn">Export JSON</button>
+        <button id="importJsonBtn" class="btn">Import JSON</button>
+        <button id="exportPdfBtn" class="btn neon">Export PDF</button>
+        <button id="deployHelpBtn" class="btn">Deploy</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar" id="sidebar">
+        <section class="panel">
+          <h3>Tools & Costs <button id="addToolBtn" class="small-btn">＋</button></h3>
+          <div id="toolsList" class="tools-list" aria-live="polite"></div>
+
+          <hr/>
+          <h4>Quick Calculator</h4>
+          <div class="form-row">
+            <label>Workers</label>
+            <input id="numWorkers" type="number" min="0" />
+          </div>
+          <div class="form-row">
+            <label>Per-worker/day</label>
+            <input id="perWorker" type="number" min="0" />
+          </div>
+          <div class="form-row">
+            <label>Misc/day</label>
+            <input id="miscDaily" type="number" min="0" />
+          </div>
+          <div class="form-row">
+            <label>Preset</label>
+            <select id="presetSelect"><option value="">—select—</option></select>
+            <button id="savePresetBtn" class="small-btn">Save</button>
+          </div>
+
+          <div class="calc-summary">
+            <div>Tools/day: <span id="toolsDailyTotal">$0</span></div>
+            <div>Labor/day: <span id="laborDailyTotal">$0</span></div>
+            <div>Misc/day: <span id="miscDailyTotal">$0</span></div>
+            <div class="big">Grand/day: <span id="grandDaily">$0</span></div>
+          </div>
+        </section>
+
+        <section class="panel small">
+          <h4>Integrations</h4>
+          <div id="integrationsShort">
+            <div>Twilio</div>
+            <div>WhatsApp Cloud</div>
+            <div>Vapi</div>
+            <div>n8n / Make</div>
+            <div>GHL</div>
+            <button id="openIntegrationsBtn" class="small-btn neon">Open</button>
+          </div>
+        </section>
+
+        <section class="panel small">
+          <h4>Diary</h4>
+          <textarea id="quickDiary" rows="4" placeholder="Write notes — they remain until you edit/delete"></textarea>
+          <div class="form-row">
+            <button id="addDiaryBtn" class="small-btn">Add Note</button>
+            <button id="viewDiaryBtn" class="small-btn">View All</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="main" id="mainContent">
+        <div class="controls">
+          <label>Show phase:
+            <select id="phaseFilter"><option value="all">All</option></select>
+          </label>
+          <button id="collapseAllBtn" class="small-btn">Collapse All</button>
+          <button id="expandAllBtn" class="small-btn">Expand All</button>
+          <label class="switch"><input id="compactToggle" type="checkbox"><span>Compact</span></label>
+        </div>
+
+        <div id="roadmap" class="roadmap" aria-live="polite"></div>
+      </section>
+
+      <aside class="right-rail" id="rightRail">
+        <section class="panel">
+          <h4>Integration Panel</h4>
+          <div id="integrationForms">
+            <!-- Twilio -->
+            <details open>
+              <summary>Twilio</summary>
+              <div class="form-row"><label>Account SID</label><input id="twilioSid" /></div>
+              <div class="form-row"><label>Auth Token</label><input id="twilioAuth" /></div>
+              <div class="form-row"><label>Phone</label><input id="twilioPhone" /></div>
+              <div class="form-row"><button class="btn small" data-test="twilio">Test connection</button></div>
+            </details>
+
+            <!-- WhatsApp -->
+            <details>
+              <summary>WhatsApp Cloud API</summary>
+              <div class="form-row"><label>App ID</label><input id="waAppId" /></div>
+              <div class="form-row"><label>Page ID</label><input id="waPageId" /></div>
+              <div class="form-row"><label>Token</label><input id="waToken" /></div>
+              <div class="form-row"><button class="btn small" data-test="wa">Test connection</button></div>
+            </details>
+
+            <!-- Vapi -->
+            <details>
+              <summary>Vapi</summary>
+              <div class="form-row"><label>API Key</label><input id="vapiKey" /></div>
+              <div class="form-row"><label>Voice Model</label><input id="vapiModel" /></div>
+              <div class="form-row"><label>Number</label><input id="vapiNumber" /></div>
+              <div class="form-row"><button class="btn small" data-test="vapi">Test connection</button></div>
+            </details>
+
+            <!-- n8n / Make -->
+            <details>
+              <summary>n8n / Make webhooks</summary>
+              <div class="form-row"><label>Webhook URL</label><input id="webhookUrl" /></div>
+              <div class="form-row"><button class="btn small" data-test="webhook">Send sample</button></div>
+            </details>
+
+            <!-- GHL -->
+            <details>
+              <summary>GoHighLevel (GHL)</summary>
+              <div class="form-row"><label>API Key</label><input id="ghlApi" /></div>
+              <div class="form-row"><label>Base URL</label><input id="ghlBase" /></div>
+              <div class="form-row"><button class="btn small" data-test="ghl">Test connection</button></div>
+            </details>
+
+          </div>
+        </section>
+
+        <section class="panel small">
+          <h4>Quick actions</h4>
+          <button id="saveToServerBtn" class="btn neon">Save to server</button>
+          <div class="form-row">
+            <label>Server URL</label>
+            <input id="serverUrl" placeholder="http://localhost:3000" />
+          </div>
+          <div class="form-row">
+            <label>API Key</label>
+            <input id="apiKey" placeholder="x-api-key" />
+          </div>
+        </section>
+
+      </aside>
+    </main>
+
+    <footer class="bottombar">
+      <div>
+        <span>Tools/day:</span> <strong id="footerTools">$0</strong>
+        <span> • Labor/day:</span> <strong id="footerLabor">$0</strong>
+        <span> • Grand/day:</span> <strong id="footerGrand">$0</strong>
+      </div>
+      <div>
+        <button id="exportPdfBtn2" class="btn neon">Export PDF</button>
+        <button id="openReadme" class="btn">README</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button id="closeModal" class="close">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
