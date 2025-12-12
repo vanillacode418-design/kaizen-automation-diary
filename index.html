@@ -1,190 +1,101 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Kaizen Automation Roadmap — Dashboard</title>
-
-  <!-- jsPDF for PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  <link rel="stylesheet" href="./style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaizen HR – Employee Filter & VAPI Workflow</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="app" class="app">
-    <header class="topbar">
-      <div class="left">
-        <h1 id="app-title">Kaizen Automation Roadmap</h1>
-        <div class="meta small">Project: <input id="projectName" class="inline-input" /></div>
-      </div>
-      <div class="right">
-        <div id="progressWrap" class="progress-wrap" title="Overall progress">
-          <div id="progressPct" class="progress-pct">0%</div>
-          <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
-        </div>
-        <button id="quickSaveBtn" class="btn neon">Quick Save</button>
-        <button id="exportJsonBtn" class="btn">Export JSON</button>
-        <button id="importJsonBtn" class="btn">Import JSON</button>
-        <button id="exportPdfBtn" class="btn neon">Export PDF</button>
-        <button id="deployHelpBtn" class="btn">Deploy</button>
-      </div>
-    </header>
 
-    <main class="layout">
-      <aside class="sidebar" id="sidebar">
-        <section class="panel">
-          <h3>Tools & Costs <button id="addToolBtn" class="small-btn">＋</button></h3>
-          <div id="toolsList" class="tools-list" aria-live="polite"></div>
+<header>
+    <h1>Kaizen Employee Filter Portal</h1>
+    <p>HR Automation • VAPI Inbound & Outbound Workflow</p>
+</header>
 
-          <hr/>
-          <h4>Quick Calculator</h4>
-          <div class="form-row">
-            <label>Workers</label>
-            <input id="numWorkers" type="number" min="0" />
-          </div>
-          <div class="form-row">
-            <label>Per-worker/day</label>
-            <input id="perWorker" type="number" min="0" />
-          </div>
-          <div class="form-row">
-            <label>Misc/day</label>
-            <input id="miscDaily" type="number" min="0" />
-          </div>
-          <div class="form-row">
-            <label>Preset</label>
-            <select id="presetSelect"><option value="">—select—</option></select>
-            <button id="savePresetBtn" class="small-btn">Save</button>
-          </div>
+<section class="container">
+    <h2>Employee Filter Form</h2>
+    <form id="employeeForm">
 
-          <div class="calc-summary">
-            <div>Tools/day: <span id="toolsDailyTotal">$0</span></div>
-            <div>Labor/day: <span id="laborDailyTotal">$0</span></div>
-            <div>Misc/day: <span id="miscDailyTotal">$0</span></div>
-            <div class="big">Grand/day: <span id="grandDaily">$0</span></div>
-          </div>
-        </section>
-
-        <section class="panel small">
-          <h4>Integrations</h4>
-          <div id="integrationsShort">
-            <div>Twilio</div>
-            <div>WhatsApp Cloud</div>
-            <div>Vapi</div>
-            <div>n8n / Make</div>
-            <div>GHL</div>
-            <button id="openIntegrationsBtn" class="small-btn neon">Open</button>
-          </div>
-        </section>
-
-        <section class="panel small">
-          <h4>Diary</h4>
-          <textarea id="quickDiary" rows="4" placeholder="Write notes — they remain until you edit/delete"></textarea>
-          <div class="form-row">
-            <button id="addDiaryBtn" class="small-btn">Add Note</button>
-            <button id="viewDiaryBtn" class="small-btn">View All</button>
-          </div>
-        </section>
-      </aside>
-
-      <section class="main" id="mainContent">
-        <div class="controls">
-          <label>Show phase:
-            <select id="phaseFilter"><option value="all">All</option></select>
-          </label>
-          <button id="collapseAllBtn" class="small-btn">Collapse All</button>
-          <button id="expandAllBtn" class="small-btn">Expand All</button>
-          <label class="switch"><input id="compactToggle" type="checkbox"><span>Compact</span></label>
+        <div class="form-group">
+            <label>Employee Name</label>
+            <input type="text" id="empName" required>
         </div>
 
-        <div id="roadmap" class="roadmap" aria-live="polite"></div>
-      </section>
+        <div class="form-group">
+            <label>Primary Trade</label>
+            <select id="trade" required>
+                <option value="">Select Trade</option>
+                <option>Electrician</option>
+                <option>Plumber</option>
+                <option>Duct Fitter</option>
+                <option>Bricklayer</option>
+                <option>360 Operator</option>
+                <option>Scaffolder</option>
+                <option>Telecom Rigger</option>
+                <option>Labourer</option>
+            </select>
+        </div>
 
-      <aside class="right-rail" id="rightRail">
-        <section class="panel">
-          <h4>Integration Panel</h4>
-          <div id="integrationForms">
-            <!-- Twilio -->
-            <details open>
-              <summary>Twilio</summary>
-              <div class="form-row"><label>Account SID</label><input id="twilioSid" /></div>
-              <div class="form-row"><label>Auth Token</label><input id="twilioAuth" /></div>
-              <div class="form-row"><label>Phone</label><input id="twilioPhone" /></div>
-              <div class="form-row"><button class="btn small" data-test="twilio">Test connection</button></div>
-            </details>
+        <div class="form-group">
+            <label>Years of Experience</label>
+            <input type="number" id="experience" min="0" required>
+        </div>
 
-            <!-- WhatsApp -->
-            <details>
-              <summary>WhatsApp Cloud API</summary>
-              <div class="form-row"><label>App ID</label><input id="waAppId" /></div>
-              <div class="form-row"><label>Page ID</label><input id="waPageId" /></div>
-              <div class="form-row"><label>Token</label><input id="waToken" /></div>
-              <div class="form-row"><button class="btn small" data-test="wa">Test connection</button></div>
-            </details>
+        <div class="form-group">
+            <label>Tools Available?</label>
+            <select id="tools" required>
+                <option value="">Select</option>
+                <option>Yes</option>
+                <option>No</option>
+            </select>
+        </div>
 
-            <!-- Vapi -->
-            <details>
-              <summary>Vapi</summary>
-              <div class="form-row"><label>API Key</label><input id="vapiKey" /></div>
-              <div class="form-row"><label>Voice Model</label><input id="vapiModel" /></div>
-              <div class="form-row"><label>Number</label><input id="vapiNumber" /></div>
-              <div class="form-row"><button class="btn small" data-test="vapi">Test connection</button></div>
-            </details>
+        <div class="form-group">
+            <label>PPE Available?</label>
+            <select id="ppe" required>
+                <option value="">Select</option>
+                <option>Yes</option>
+                <option>No</option>
+            </select>
+        </div>
 
-            <!-- n8n / Make -->
-            <details>
-              <summary>n8n / Make webhooks</summary>
-              <div class="form-row"><label>Webhook URL</label><input id="webhookUrl" /></div>
-              <div class="form-row"><button class="btn small" data-test="webhook">Send sample</button></div>
-            </details>
+        <div class="form-group">
+            <label>Safety Tier</label>
+            <select id="safetyTier" required>
+                <option value="">Select Safety Tier</option>
+                <option>Tier 1 – High Risk</option>
+                <option>Tier 2 – Medium Risk</option>
+                <option>Tier 3 – Standard Risk</option>
+            </select>
+        </div>
 
-            <!-- GHL -->
-            <details>
-              <summary>GoHighLevel (GHL)</summary>
-              <div class="form-row"><label>API Key</label><input id="ghlApi" /></div>
-              <div class="form-row"><label>Base URL</label><input id="ghlBase" /></div>
-              <div class="form-row"><button class="btn small" data-test="ghl">Test connection</button></div>
-            </details>
+        <button type="submit">Filter Employee</button>
+    </form>
+</section>
 
-          </div>
-        </section>
+<section class="container workflow">
+    <h2>Inbound VAPI Workflow</h2>
+    <ul>
+        <li>Receive employee data from form</li>
+        <li>Validate WhatsApp / Opt-In</li>
+        <li>Run compliance check</li>
+        <li>Match safety tier → Tier 1/2/3</li>
+        <li>Match job using tags + filters</li>
+        <li>Trigger schedule_interview or follow_up_later</li>
+    </ul>
 
-        <section class="panel small">
-          <h4>Quick actions</h4>
-          <button id="saveToServerBtn" class="btn neon">Save to server</button>
-          <div class="form-row">
-            <label>Server URL</label>
-            <input id="serverUrl" placeholder="http://localhost:3000" />
-          </div>
-          <div class="form-row">
-            <label>API Key</label>
-            <input id="apiKey" placeholder="x-api-key" />
-          </div>
-        </section>
+    <h2>Outbound VAPI Workflow</h2>
+    <ul>
+        <li>Send WhatsApp / SMS template</li>
+        <li>Ask YES/NO availability</li>
+        <li>Collect Tools & PPE responses</li>
+        <li>Send job pack if matched</li>
+        <li>Trigger attendance workflow</li>
+        <li>Send ETA request and confirmation</li>
+    </ul>
+</section>
 
-      </aside>
-    </main>
-
-    <footer class="bottombar">
-      <div>
-        <span>Tools/day:</span> <strong id="footerTools">$0</strong>
-        <span> • Labor/day:</span> <strong id="footerLabor">$0</strong>
-        <span> • Grand/day:</span> <strong id="footerGrand">$0</strong>
-      </div>
-      <div>
-        <button id="exportPdfBtn2" class="btn neon">Export PDF</button>
-        <button id="openReadme" class="btn">README</button>
-      </div>
-    </footer>
-  </div>
-
-  <!-- Modals -->
-  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-content">
-      <button id="closeModal" class="close">✕</button>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <script src="./script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
